@@ -1,0 +1,11 @@
+rsvplist.add_action:
+  title: 'Ajouter une inscription'
+  route_name: rsvplist.add_form
+  appears_on:
+    - rsvplist.report
+
+rsvplist.add_export_action:
+  title: 'Exporter en CSV'
+  route_name: rsvplist.export
+  appears_on:
+    - rsvplist.report

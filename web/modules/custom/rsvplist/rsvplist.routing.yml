@@ -55,3 +55,11 @@ rsvplist.export:
     _title: 'Exporter les inscriptions'
   requirements:
     _permission: 'administer rsvplist'
+
+rsvplist.add_form:
+  path: "/rsvplist"
+  defaults:
+    _title: "RSVP Form"
+    _form: '\Drupal\rsvplist\Form\RSVPForm'
+  requirements:
+    _permission: "view rsvplist"

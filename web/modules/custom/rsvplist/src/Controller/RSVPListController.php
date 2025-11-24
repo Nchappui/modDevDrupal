@@ -4,6 +4,7 @@ namespace Drupal\rsvplist\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Database\Connection;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\node\NodeInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -13,20 +14,20 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 class RsvpListController extends ControllerBase {
 
-  /**
-   * Service de base de données.
-   *
-   * @var \Drupal\Core\Database\Connection
-   */
   protected $database;
+  protected $entityTypeManager;
 
-  /**
-   * {@inheritdoc}
-   */
-  public function __construct(Connection $database) {
+  public function __construct(Connection $database, EntityTypeManagerInterface $entity_type_manager) {
     $this->database = $database;
+    $this->entityTypeManager = $entity_type_manager;
   }
 
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('database'),
+      $container->get('entity_type.manager')
+    );
+  }
   /**
    * Exporter les inscriptions au format CSV.
    */
@@ -72,21 +73,27 @@ class RsvpListController extends ControllerBase {
     return $response;
   }
 
+  protected function safeNodeLink($nidOrNode) {
+    // Accepte soit un nid, soit un objet NodeInterface.
+    if ($nidOrNode instanceof NodeInterface) {
+      $node = $nidOrNode;
+    }
+    else {
+      $nid = (int) $nidOrNode;
+      if ($nid <= 0) {
+        return $this->t('Nœud invalide');
+      }
+      $node = $this->entityTypeManager->getStorage('node')->load($nid);
+    }
 
-  /**
-   * {@inheritdoc}
-   */
-  public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('database')
-    );
+    if ($node instanceof NodeInterface && $node->access('view')) {
+      return $node->toLink()->toString();
+    }
+
+    return $this->t('Nœud introuvable ou inaccessible');
   }
 
-  /**
-   * Page de rapport : Liste toutes les inscriptions.
-   */
   public function report() {
-    // Récupérer toutes les inscriptions
     $query = $this->database->select('rsvplist', 'r')
       ->fields('r', ['id', 'uid', 'nid', 'email', 'created'])
       ->orderBy('r.created', 'DESC')
@@ -94,35 +101,45 @@ class RsvpListController extends ControllerBase {
 
     $results = $query->execute()->fetchAll();
 
-    // Construire le tableau HTML
+
     $rows = [];
     foreach ($results as $row) {
-      $node = $this->entityTypeManager()->getStorage('node')->load($row->nid);
-      $user = $this->entityTypeManager()->getStorage('user')->load($row->uid);
+      $node = $this->entityTypeManager->getStorage('node')->load((int) $row->nid);
+      $user = $this->entityTypeManager->getStorage('user')->load((int) $row->uid);
+
+      // Créer un lien vers la page de détails
+      $id_link = \Drupal\Core\Link::createFromRoute(
+        $row->id,
+        'rsvplist.details',
+        ['rsvp_id' => $row->id]
+      )->toString();
 
       $rows[] = [
-        $row->id,
-        $node ? $node->toLink()->toString() : $this->t('Nœud supprimé'),
+        $id_link,
+        $this->safeNodeLink($node),
         $user ? $user->toLink()->toString() : $this->t('Utilisateur supprimé'),
         $row->email,
         $this->t('@time ago', ['@time' => \Drupal::service('date.formatter')->formatInterval(time() - $row->created)]),
       ];
     }
 
+    // Retourne le debug puis le tableau principal.
     return [
-      '#theme' => 'table',
-      '#header' => [
-        $this->t('ID'),
-        $this->t('Événement'),
-        $this->t('Utilisateur'),
-        $this->t('Email'),
-        $this->t('Date d\'inscription'),
-      ],
-      '#rows' => $rows,
-      '#empty' => $this->t('Aucune inscription pour le moment.'),
-      '#cache' => [
-        'max-age' => 300,
-        'tags' => ['rsvplist_list'],
+      'rsvps' => [
+        '#theme' => 'table',
+        '#header' => [
+          $this->t('ID'),
+          $this->t('Événement'),
+          $this->t('Utilisateur'),
+          $this->t('Email'),
+          $this->t('Date d\'inscription'),
+        ],
+        '#rows' => $rows,
+        '#empty' => $this->t('Aucune inscription pour le moment.'),
+        '#cache' => [
+          'max-age' => 300,
+          'tags' => ['rsvplist_list'],
+        ],
       ],
     ];
   }
@@ -219,6 +236,5 @@ class RsvpListController extends ControllerBase {
 
     return $build;
   }
-
 
 }
