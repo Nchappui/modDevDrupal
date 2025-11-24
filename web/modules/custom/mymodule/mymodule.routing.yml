@@ -1,0 +1,7 @@
+mymodule.pageExample:
+  path: '/examplePage/{pageNum}'
+  defaults:
+    _controller: '\Drupal\mymodule\Controller\FirstController::simpleContent'
+    _title: 'Basic routing example'
+  requirements:
+    _permission: 'access content'

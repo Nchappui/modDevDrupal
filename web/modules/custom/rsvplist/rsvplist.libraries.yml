@@ -1,0 +1,11 @@
+simple_text_field:
+  version: 1.x
+  css:
+    theme:
+      css/simple-text-field.css: {}
+
+simple_text_minimal:
+  version: 1.x
+  css:
+    theme:
+      css/simple-text-minimal.css: {}

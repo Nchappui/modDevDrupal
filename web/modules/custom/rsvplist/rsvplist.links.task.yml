@@ -1,0 +1,13 @@
+# Onglet "Inscriptions" sur la page d'un nœud
+rsvplist.node_tab:
+  title: 'Inscriptions'
+  route_name: rsvplist.events
+  base_route: entity.node.canonical  # Apparaît sur /node/{nid}
+  weight: 10
+
+# Onglet secondaire "Exporter"
+rsvplist.export_tab:
+  title: 'Exporter'
+  route_name: rsvplist.export
+  parent_id: rsvplist.report  # Sous-onglet de la page de rapport
+  weight: 20

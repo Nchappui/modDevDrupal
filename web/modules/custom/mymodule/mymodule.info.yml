@@ -1,0 +1,7 @@
+name: 'My custom module'
+type: module
+core_version_requirement: ^11
+description: 'My first custom module'
+package: 'Custom modules'
+dependencies:
+  - drupal:block

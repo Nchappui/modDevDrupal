@@ -1,0 +1,33 @@
+<?php
+
+/**
+ * @file
+ * This file demonstrates hwo to use hook functions.
+ */
+
+/**
+ * Implements hook_theme().
+ */
+function rsvplist_theme() {
+  return [
+    'simple_text_field' => [
+      'variables' => ['value' => NULL],
+    ],
+    'simple_text_field_minimal' => [
+      'variables' => ['value' => NULL],
+    ],
+    'hello_block' => [
+      'variables' => [
+        'custom_data' => [],
+        'custom_string' => '',
+      ],
+    ],
+    'hello_block2' => [
+      'variables' => [
+        'active_tab' => NULL,
+        'body_text' => NULL,
+        'tabs' => [],
+      ],
+    ],
+  ];
+}

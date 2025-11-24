@@ -1,0 +1,10 @@
+name: RSVP module
+type: module
+core_version_requirement: ^11
+description: Module for registration to RSVP
+package: 'Custom modules'
+
+dependencies:
+  - drupal:block
+
+configure: rsvplist.admin_settings

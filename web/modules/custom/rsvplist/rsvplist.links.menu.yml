@@ -1,0 +1,30 @@
+rsvp.admin_settings_link:
+  title: RSVP List Settings
+  description: Control display of RSVP form
+  route_name: rsvplist.admin_settings.form
+  parent: system.admin_config_content #/admin/config/content
+  weight: 10
+
+rsvplist.showRSVPList:
+  title: 'View plain RSVP'
+  description: 'Basic RSVP'
+  route_name: rsvplist.form
+  menu_name: main #/main navigation
+  weight: 20
+
+
+# Menu dans la section "Rapports"
+rsvplist.report_menu:
+  title: 'Inscriptions RSVP'
+  description: 'Liste des personnes inscrites aux événements'
+  route_name: rsvplist.report
+  parent: system.admin_reports  # Sous-menu de "Rapports"
+  weight: 10
+
+# Menu dans la navigation principale
+rsvplist.events_menu:
+  title: 'Événements'
+  description: 'Liste des événements avec inscriptions'
+  route_name: rsvplist.events
+  menu_name: main  # Menu principal
+  weight: 50

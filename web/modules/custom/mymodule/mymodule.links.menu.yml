@@ -1,0 +1,10 @@
+mymodule.menuLink:
+  title: "Simple content page"
+  description: "adasd"
+  menu_name: main
+  route_name: mymodule.pageExample
+  route_parameters:
+    pageNum: 1
+  weight: 100
+
+

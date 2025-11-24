@@ -1,0 +1,57 @@
+rsvplist.form:
+  path: "/rsvplist"
+  defaults:
+    _title: "RSVP Form"
+    _form: '\Drupal\rsvplist\Form\RSVPForm'
+  requirements:
+    _permission: "view rsvplist"
+
+rsvplist.admin_settings.form:
+  path: "/rsvplist/settings"
+  defaults:
+    _title: "RSVP Form Settings"
+    _form: '\Drupal\rsvplist\Form\RSVPConfigForm'
+  requirements:
+    _permission: "administer rsvplist"
+
+# Page de rapport des inscriptions
+rsvplist.report:
+  path: '/admin/reports/rsvplist'
+  defaults:
+    _controller: '\Drupal\rsvplist\Controller\RSVPListController::report'
+    _title: 'Inscriptions RSVP'
+  requirements:
+    _permission: 'view rsvplist'
+
+# Détails d'une inscription spécifique
+rsvplist.details:
+  path: '/admin/reports/rsvplist/{rsvp_id}'
+  defaults:
+    _controller: '\Drupal\rsvplist\Controller\RSVPListController::details'
+    _title: "Détails de l'inscription"
+  requirements:
+    _permission: 'view rsvplist'
+    rsvp_id: \d+  # Paramètre numérique uniquement
+
+# Page publique avec paramètre optionnel
+rsvplist.events:
+  path: '/events/{node}'
+  defaults:
+    _controller: '\Drupal\rsvplist\Controller\RSVPListController::eventList'
+    _title: 'Liste des événements'
+    node: NULL  # Paramètre optionnel
+  requirements:
+    _permission: 'access content'
+    node: \d+
+  options:
+    parameters:
+      node:
+        type: entity:node  # Conversion automatique en objet Node
+
+rsvplist.export:
+  path: '/admin/reports/rsvplist/export'
+  defaults:
+    _controller: '\Drupal\rsvplist\Controller\RSVPListController::export'
+    _title: 'Exporter les inscriptions'
+  requirements:
+    _permission: 'administer rsvplist'

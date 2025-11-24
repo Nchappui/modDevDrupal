@@ -1,0 +1,73 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the rsvplist module.
+ */
+
+ /*
+ * Implements rsvplist_schema()
+ */
+
+ function rsvplist_schema(){
+   $schema['rsvplist'] = array(
+     'description' => 'RSVP list to store all the emails',
+     'fields' => array(
+       'id' => array(
+         'description' => 'The rsvp list ID',
+         'type' => 'serial',
+         'unsigned' => TRUE,
+         'not null' => TRUE,
+       ),
+       'uid' => array(
+         'description' => 'The user ID',
+         'type' => 'int',
+         'unsigned' => TRUE,
+         'not null' => TRUE,
+         'default' => 0
+       ),
+       'nid' => array(
+         'description' => 'The node from which the user subscribed to RSVP',
+         'type' => 'int',
+         'unsigned' => TRUE,
+         'not null' => TRUE,
+         'default' => 0
+       ),
+       'email' => array(
+         'description' => 'The email address of the user',
+         'type' => 'varchar',
+         'length' => 255,
+         'not null' => TRUE,
+         'default' => ''
+       ),
+       'created' => array(
+         'description' => 'The date of the rsvp',
+         'type' => 'int',
+         'unsigned' => TRUE,
+         'not null' => TRUE,
+         'default' => 0
+       )
+     ),
+     'primary key' => array('id'),
+     'indexes' => array(
+       'node' => array('nid'),
+       'node_user' => array('nid', 'uid'),
+     )
+   );
+
+   $schema['rsvplist_enabled'] = [
+     'description' => 'Tracks whether RSVP is enabled or not for a node.',
+     'fields' => [
+       'nid' => [
+         'description' => 'The {node}.nid that has RSVPList enabled.',
+         'type' => 'int',
+         'unsigned' => TRUE,
+         'not null' => TRUE,
+         'default' => 0,
+       ],
+     ],
+     'primary key' => ['nid'],
+   ];
+
+   return $schema;
+ }
