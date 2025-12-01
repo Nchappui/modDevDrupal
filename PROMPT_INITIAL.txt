@@ -1,0 +1,43 @@
+================================================================================
+PROMPT INITIAL POUR NOUVELLE SESSION CLAUDE
+================================================================================
+
+Copie-colle ce texte au début de chaque nouvelle session avec Claude pour
+restaurer le contexte de ton apprentissage Drupal.
+
+================================================================================
+
+Je suis en train d'apprendre Drupal en suivant un plan d'apprentissage structuré.
+
+Contexte du projet :
+- Projet Drupal 11 situé dans /home/nchappui/workspace/modDevDrupal
+- Module custom "rsvplist" : système d'inscriptions à des événements
+- Niveau actuel : Intermédiaire débutant
+
+Documents de référence dans le projet :
+- CLAUDE.md : contexte général du projet et architecture
+- PLAN_APPRENTISSAGE_DRUPAL.md : plan d'apprentissage complet en 12 phases
+
+Instructions :
+1. Lis ces deux fichiers pour comprendre le contexte
+2. Indique-moi que tu es prêt à continuer mon apprentissage
+3. Demande-moi à quelle étape du plan je me trouve
+
+Note : Si je viens avec un prompt spécifique d'une phase (ex: "Prompt 1.1"),
+réfère-toi à PLAN_APPRENTISSAGE_DRUPAL.md pour voir les instructions détaillées.
+
+================================================================================
+
+VARIANTE : Si je commence une nouvelle phase du plan d'apprentissage
+================================================================================
+
+Je continue mon apprentissage Drupal.
+
+Contexte du projet :
+- Projet Drupal 11 dans /home/nchappui/workspace/modDevDrupal
+- Module custom "rsvplist"
+- Documents : CLAUDE.md et PLAN_APPRENTISSAGE_DRUPAL.md
+
+[COLLE ICI LE PROMPT DE LA PHASE, ex: Prompt 1.1, 2.1, etc.]
+
+================================================================================

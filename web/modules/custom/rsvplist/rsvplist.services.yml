@@ -1,0 +1,12 @@
+services:
+  rsvplist.enabler:
+    class: Drupal\rsvplist\EnablerService
+    arguments: ['@database', '@logger.channel.rsvplist']
+
+  logger.channel.rsvplist:
+    parent: logger.channel_base
+    arguments: [ 'rsvplist' ]
+
+  rsvplist.form_alter:
+    class: Drupal\rsvplist\FormAlterService
+    arguments: ['@config.factory', '@rsvplist.enabler', '@current_user']

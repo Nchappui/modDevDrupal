@@ -2,6 +2,7 @@
 // File: web/modules/custom/rsvplist/src/Plugin/Field/FieldWidget/SimpleTextWidget.php
 namespace Drupal\rsvplist\Plugin\Field\FieldWidget;
 
+use Drupal\Core\Field\Annotation\FieldWidget;
 use Drupal\Core\Field\WidgetBase;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;

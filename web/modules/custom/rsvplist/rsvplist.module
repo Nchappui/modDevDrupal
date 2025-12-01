@@ -5,6 +5,8 @@
  * This file demonstrates hwo to use hook functions.
  */
 
+use Drupal\Core\Form\FormStateInterface;
+
 /**
  * Implements hook_theme().
  */
@@ -31,3 +33,11 @@ function rsvplist_theme() {
     ],
   ];
 }
+
+/**
+ * Implements hook_form_node_form_alter()
+ */
+function rsvplist_form_node_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  \Drupal::service('rsvplist.form_alter')->alterNodeForm($form, $form_state);
+}
+

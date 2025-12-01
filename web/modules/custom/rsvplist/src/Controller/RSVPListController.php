@@ -10,26 +10,52 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * Contrôleur pour les pages RSVP.
+ * Controller for RSVP list pages and event management.
  */
 class RsvpListController extends ControllerBase {
 
+  /**
+   * The database connection.
+   *
+   * @var \Drupal\Core\Database\Connection
+   */
   protected $database;
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
   protected $entityTypeManager;
 
+  /**
+   * Constructs a RsvpListController object.
+   *
+   * @param \Drupal\Core\Database\Connection $database
+   *   The database connection.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
+   */
   public function __construct(Connection $database, EntityTypeManagerInterface $entity_type_manager) {
     $this->database = $database;
     $this->entityTypeManager = $entity_type_manager;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('database'),
       $container->get('entity_type.manager')
     );
   }
+
   /**
-   * Exporter les inscriptions au format CSV.
+   * Exports all RSVP registrations to a CSV file.
+   *
+   * @return \Symfony\Component\HttpFoundation\Response
+   *   A CSV file download response.
    */
   public function export() {
     // Récupérer toutes les inscriptions
@@ -73,83 +99,17 @@ class RsvpListController extends ControllerBase {
     return $response;
   }
 
-  protected function safeNodeLink($nidOrNode) {
-    // Accepte soit un nid, soit un objet NodeInterface.
-    if ($nidOrNode instanceof NodeInterface) {
-      $node = $nidOrNode;
-    }
-    else {
-      $nid = (int) $nidOrNode;
-      if ($nid <= 0) {
-        return $this->t('Nœud invalide');
-      }
-      $node = $this->entityTypeManager->getStorage('node')->load($nid);
-    }
-
-    if ($node instanceof NodeInterface && $node->access('view')) {
-      return $node->toLink()->toString();
-    }
-
-    return $this->t('Nœud introuvable ou inaccessible');
-  }
-
-  public function report() {
-    $query = $this->database->select('rsvplist', 'r')
-      ->fields('r', ['id', 'uid', 'nid', 'email', 'created'])
-      ->orderBy('r.created', 'DESC')
-      ->range(0, 50);
-
-    $results = $query->execute()->fetchAll();
-
-
-    $rows = [];
-    foreach ($results as $row) {
-      $node = $this->entityTypeManager->getStorage('node')->load((int) $row->nid);
-      $user = $this->entityTypeManager->getStorage('user')->load((int) $row->uid);
-
-      // Créer un lien vers la page de détails
-      $id_link = \Drupal\Core\Link::createFromRoute(
-        $row->id,
-        'rsvplist.details',
-        ['rsvp_id' => $row->id]
-      )->toString();
-
-      $rows[] = [
-        $id_link,
-        $this->safeNodeLink($node),
-        $user ? $user->toLink()->toString() : $this->t('Utilisateur supprimé'),
-        $row->email,
-        $this->t('@time ago', ['@time' => \Drupal::service('date.formatter')->formatInterval(time() - $row->created)]),
-      ];
-    }
-
-    // Retourne le debug puis le tableau principal.
-    return [
-      'rsvps' => [
-        '#theme' => 'table',
-        '#header' => [
-          $this->t('ID'),
-          $this->t('Événement'),
-          $this->t('Utilisateur'),
-          $this->t('Email'),
-          $this->t('Date d\'inscription'),
-        ],
-        '#rows' => $rows,
-        '#empty' => $this->t('Aucune inscription pour le moment.'),
-        '#cache' => [
-          'max-age' => 300,
-          'tags' => ['rsvplist_list'],
-        ],
-      ],
-    ];
-  }
-
-
   /**
-   * Détails d'une inscription spécifique.
+   * Displays details of a specific RSVP registration.
    *
    * @param int $rsvp_id
-   *   ID de l'inscription.
+   *   The RSVP registration ID.
+   *
+   * @return array
+   *   A render array containing the registration details.
+   *
+   * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+   *   If the registration does not exist.
    */
   public function details($rsvp_id) {
     $rsvp = $this->database->select('rsvplist', 'r')
@@ -162,8 +122,8 @@ class RsvpListController extends ControllerBase {
       throw new NotFoundHttpException();
     }
 
-    $node = $this->entityTypeManager()->getStorage('node')->load($rsvp->nid);
-    $user = $this->entityTypeManager()->getStorage('user')->load($rsvp->uid);
+    $node = $this->entityTypeManager->getStorage('node')->load($rsvp->nid);
+    $user = $this->entityTypeManager->getStorage('user')->load($rsvp->uid);
 
     return [
       '#theme' => 'item_list',
@@ -182,10 +142,13 @@ class RsvpListController extends ControllerBase {
 
 
   /**
-   * Liste des événements avec inscriptions.
+   * Lists all events with RSVP registrations.
    *
    * @param \Drupal\node\NodeInterface|null $node
-   *   Nœud optionnel (conversion automatique depuis l'URL).
+   *   (optional) A specific node to show registrations for.
+   *
+   * @return array
+   *   A render array containing the event list or specific event registrations.
    */
   public function eventList(NodeInterface $node = NULL) {
     $build = [];

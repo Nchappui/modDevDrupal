@@ -1,6 +1,6 @@
 # Onglet "Inscriptions" sur la page d'un nœud
 rsvplist.node_tab:
   title: 'Inscriptions'
-  route_name: rsvplist.events
+  route_name: rsvplist.event_details
   base_route: entity.node.canonical  # Apparaît sur /node/{nid}
   weight: 10
