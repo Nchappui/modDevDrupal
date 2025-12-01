@@ -10,6 +10,7 @@ use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Egulias\EmailValidator\EmailValidator;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 
@@ -65,6 +66,12 @@ class RSVPForm extends FormBase
   protected $emailValidator;
 
   /**
+   * The logger service.
+   *
+   * @var LoggerInterface
+   */
+  protected $logger;
+  /**
    * Constructs an RSVPForm object.
    *
    * @param Connection $database
@@ -81,6 +88,8 @@ class RSVPForm extends FormBase
    *   The email validator.
    * @param EntityTypeManagerInterface $entity_type_manager
    *  The entity type manager.
+   * @param LoggerInterface $logger
+   *  The logger service.
    */
   public function __construct(
     Connection $database,
@@ -89,7 +98,8 @@ class RSVPForm extends FormBase
     RouteMatchInterface $route_match,
     MessengerInterface $messenger,
     EmailValidator $email_validator,
-    EntityTypeManagerInterface $entity_type_manager
+    EntityTypeManagerInterface $entity_type_manager,
+    LoggerInterface $logger
   ) {
     $this->database = $database;
     $this->currentUser = $current_user;
@@ -98,6 +108,7 @@ class RSVPForm extends FormBase
     $this->messenger = $messenger;
     $this->emailValidator = $email_validator;
     $this->entityTypeManager = $entity_type_manager;
+    $this->logger = $logger;
   }
 
   /**
@@ -111,7 +122,8 @@ class RSVPForm extends FormBase
       $container->get('current_route_match'),
       $container->get('messenger'),
       $container->get('email.validator'),
-      $container->get('entity_type.manager')
+      $container->get('entity_type.manager'),
+      $container->get('logger.channel.rsvplist')
     );
   }
 
@@ -170,7 +182,13 @@ class RSVPForm extends FormBase
 
       $this->messenger->addMessage($this->t('Thank you! Your email @email has been registered.', ['@email' => $email]));
     } catch (\Exception $exception) {
-      $this->messenger->addError($this->t('An error occurred: @error', ['@error' => $exception->getMessage()]));
+      $this->messenger->addError($this->t('An error occurred while processing your RSVP. Please try again later.'));
+      $this->logger->error('An error occurred: @message with the following values: @email, @nid, @uid', [
+        '@message' => $exception->getMessage(),
+        '@email' => $email,
+        '@nid' => $nid,
+        '@uid' => $uid,
+      ]);
     }
   }
 
@@ -210,6 +228,11 @@ class RSVPForm extends FormBase
       }
       catch (\Exception $e) {
         $form_state->setErrorByName('', $this->t('An error occurred while validating the event.'));
+        $this->logger->error('An error occurred: @message with the following values: @nid, @email', [
+          '@message' => $e->getMessage(),
+          '@nid' => $nid,
+          '@email' => $submittedEmail,
+        ]);
       }
     }
     else {

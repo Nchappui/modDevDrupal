@@ -43,6 +43,46 @@ class EnablerService
     $this->logger = $logger;
   }
 
+  public function deleteRegistration(int $rsvp_id) {
+    $select = $this->database_connection->select('rsvplist', 'r');
+    $select->fields('r', ['nid']);
+    $select->condition('id', $rsvp_id);
+    $nid = $select->execute()->fetchField();
+
+    // 2. Démarrer la transaction
+    $transaction = $this->database_connection->startTransaction();
+
+    try {
+      // 3. Supprimer l'inscription
+      $this->database_connection->delete('rsvplist')
+        ->condition('id', $rsvp_id)
+        ->execute();
+      // 4. Compter les inscriptions restantes
+      $count = $this->database_connection->select('rsvplist', 'r')
+        ->condition('nid', $nid)
+        ->countQuery()
+        ->execute()
+        ->fetchField();
+
+      // 5. Si count = 0, désactiver RSVP
+      if ($count == 0) {
+        $this->database_connection->delete('rsvplist_enabled')
+          ->condition('nid', $nid)
+          ->execute();
+      }
+      unset($transaction);
+      return TRUE;
+
+    } catch (\Exception $e) {
+      // Rollback + log + return FALSE
+      $transaction->rollback();
+      $this->logger->error('Error deleting RSVP registration ID @id: @message', [
+        '@id' => $rsvp_id,
+        '@message' => $e->getMessage(),
+      ]);
+      return FALSE;
+    }
+  }
 
   /**
    * Checks if an individual node is RSVP enabled.

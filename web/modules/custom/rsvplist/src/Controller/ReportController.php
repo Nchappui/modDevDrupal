@@ -118,16 +118,26 @@ class ReportController extends ControllerBase {
   public function report() {
     $rows = [];
     try {
-      $results = $this->database->select('rsvplist', 'r')
-        ->fields('r', ['id', 'uid', 'nid', 'created'])
-        ->orderBy('created', 'DESC')
+      $query = $this->database->select('rsvplist', 'r');
+      $query->join('node_field_data', 'n', 'r.nid = n.nid');
+      $query->join('users_field_data', 'u', 'r.uid = u.uid');
+      $results = $query->fields('r', ['id', 'created'])
+        ->fields('n', ['nid', 'title'])
+        ->fields('u', ['uid', 'name'])
+        ->orderBy('r.created', 'DESC')
         ->range(0, 50)
         ->execute()
         ->fetchAll();
 
+      $nids = array_column($results, 'nid');
+      $uids = array_column($results, 'uid');
+
+      $nodes = $this->entityTypeManager->getStorage('node')->loadMultiple($nids);
+      $users = $this->entityTypeManager->getStorage('user')->loadMultiple($uids);
+
       foreach($results as $result){
-        $node = $this->entityTypeManager->getStorage('node')->load($result->nid);
-        $user = $this->entityTypeManager->getStorage('user')->load($result->uid);
+        $node = $nodes[$result->nid] ?? NULL;
+        $user = $users[$result->uid] ?? NULL;
         $id_link = \Drupal\Core\Link::createFromRoute(
           $result->id,
           'rsvplist.details',

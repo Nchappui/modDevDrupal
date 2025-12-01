@@ -5,6 +5,8 @@
  * Install, update and uninstall functions for the rsvplist module.
  */
 
+use Drupal\Core\Database\Database;
+
  /*
  * Implements rsvplist_schema()
  */
@@ -49,6 +51,9 @@
        )
      ),
      'primary key' => array('id'),
+     'unique keys' => array(
+       'rsvp_unique' => array('email', 'nid'),
+     ),
      'indexes' => array(
        'node' => array('nid'),
        'node_user' => array('nid', 'uid'),
@@ -70,4 +75,27 @@
    ];
 
    return $schema;
+ }
+
+ function rsvplist_update_9001(){
+   // Supprimer les doublons en gardant la plus ancienne inscription
+   $database = \Drupal::database();
+
+   // Récupérer les IDs à garder (le plus petit ID de chaque groupe nid+email)
+   $ids_to_keep = $database->query("
+     SELECT MIN(id) as id
+     FROM {rsvplist}
+     GROUP BY nid, email
+   ")->fetchCol();
+
+   // Supprimer tous les enregistrements SAUF ceux à garder
+   if (!empty($ids_to_keep)) {
+     $database->delete('rsvplist')
+       ->condition('id', $ids_to_keep, 'NOT IN')
+       ->execute();
+   }
+  $schema = Database::getConnection()->schema();
+  $schema->addUniqueKey('rsvplist', 'nid_email', ['nid', 'email']);
+
+ return t('Migration to add unique key rsvp_unique to rsvplist table completed.');
  }
