@@ -28,6 +28,23 @@ nbproject
 
 /vendor
 vendor/
-web/sites
+
+# Ignore sensitive information
+web/sites/*/settings.local.php
+web/sites/*/services*.yml
+
+# Ignore Drupal's file directory
+web/sites/*/files/
+web/sites/*/private/
+
+# Ignore SimpleTest multi-site environment
+web/sites/simpletest
+
+# But keep config sync and settings.php
+!web/sites/default/
+!web/sites/default/config/
+!web/sites/default/config/sync/
+!web/sites/default/settings.php
+
 core/node_modules
 themes/react_example_theme/js/dist_dev
